@@ -4,7 +4,6 @@ use Getopt::Long;
 
 
 my $usage    = "\t\t --usage $0 job_id=<PBS JOB ID> min=<Start of array> max=<End of array>\n";
-my $command  = "releasehold -a";
 my $job_id;
 my $min;
 my $max;
@@ -13,7 +12,7 @@ $\= "\n";
 
 
 if (! scalar(@ARGV)  ) {
-        die $usage . scalar @ARGV;
+        die $usage;
 }
 
 GetOptions ("job_id=i"  => \$job_id,
@@ -28,8 +27,8 @@ if(! $job_id || ! $min || ! $max){
 print "job=$job_id min=$min max=$max\n";
 
 
-for(my $i = $min; $i < $max; $i++){
-        my $call = "$command \"$job_id" . '\[' . $i . '\]"';
+for(my $i = $min; $i <= $max; $i++){
+        my $call = 'releasehold -a "' . $job_id .  '\[' . $i . '\]"';
         print $call;
         system($call);
 }
