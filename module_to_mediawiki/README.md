@@ -2,7 +2,7 @@
 
 * Scraps the environmental modules for the application name, version, and description
 * Sends it to a mediawiki page
-* Works with environmental modules [http://modules.sourceforge.net/] and Lmod [https://lmod.readthedocs.io/en/latest/]
+* Works with environmental modules, http://modules.sourceforge.net/ and Lmod, https://lmod.readthedocs.io/en/latest/
 
 ## Installation
 
