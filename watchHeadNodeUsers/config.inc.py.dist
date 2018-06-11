@@ -1,0 +1,12 @@
+
+
+sendmailCommand = ""
+emailServer = ""
+
+# Someone to always CC on email alerts
+alwaysCCOnAlerts = ""
+# The from address for the emails
+emailFromAddress = ""
+# Mail message body
+mailMessage = "Hello,\n\tThis is a friendly reminder that you have been running a process on the cluster login node. You should not run anything that uses up a lot of CPU or memory on the login node. Instead please use 'srun --pty /bin/bash' to login to a compute node.\n"
+

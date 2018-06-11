@@ -1,0 +1,11 @@
+<?php
+
+$wiki_api = "";
+$wiki_page = "";
+$wiki_user = "";
+$wiki_password = "";
+$wiki_domain = "";
+
+
+
+?>

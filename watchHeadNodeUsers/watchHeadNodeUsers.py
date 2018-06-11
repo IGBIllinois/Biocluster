@@ -20,6 +20,7 @@
 
 import sys, re, os, time, datetime, pickle
 
+import config.inc.py
 
 DEBUG = False
 
@@ -36,23 +37,15 @@ if (DEBUG):
 # Commands
 topCommand = "/bin/ps -A o pid,user:18,s,%cpu,%mem,time,comm"
 localAccountsCommand = "awk -F':' '{ print $1}' /etc/passwd | grep"
-sendmailCommand = "/usr/sbin/sendmail"
-emailServer = "igb.illinois.edu"
 
-# Someone to always CC on email alerts
-alwaysCCOnAlerts = "cnrg-warn@igb.illinois.edu"
-# The from address for the emails
-emailFromAddress = "Biocluster <biocluster@localhost>"
-# Mail message body
-mailMessage = "Hello,\n\tThis is a friendly reminder that you have been running a process on the cluster head node. You should not run anything that uses up a lot of CPU or memory on the head node. Instead please use 'qsub -I' to login to a compute node. More information can be found at https://help.igb.illinois.edu/Biocluster\n"
 
 # Processes to ignore
-processesToIgnore = ["smbd", "Xvnc", "sshd", "ssh", "rsync","wget", "mmfsd", "scp", "grep","sftp-server","gzip","tar","vim","sftp","cp","md5sum","gftp-gtk","system-specific","find","emacs","globus-gridftp-","sort","cut","du"]
+processesToIgnore = ["smbd", "Xvnc", "sshd", "ssh", "rsync","wget", "mmfsd", "scp", "grep","sftp-server","vim","sftp","cp","md5sum","gftp-gtk","system-specific","find","emacs","globus-gridftp-","sort","cut","du","ftp","lftp","uzip","ascp","aws","gtdownload","sha256sum","less","curl","rclone"]
 # Users to ignore
-usersToIgnore = ["blastweb","datamove"]
+usersToIgnore = ["blastweb","datamover"]
 # Thresholds for CPU and memory usage that lead to an increase in the user's
 #  record temperature.
-cpuLimit = 10.0
+cpuLimit = 15.0
 memLimit = 5.0
 
 
@@ -73,7 +66,7 @@ recordPenalty = recordCoolDown + 10
 # If this is run every 5 minutes, then with recordPenalty = 11 and recordCoolDown = 1,
 #  a user will get a warning after 2 runs (10 minutes) with a warning threshold
 # of 20.
-recordWarningThreshold = 40  
+recordWarningThreshold = 20 
 
 
 
@@ -170,7 +163,7 @@ for line in child.readlines():
 					userRecords[record] = userRecords[record] + recordPenalty
 				else:
 					userRecords[record] = recordPenalty
-				userProcess[record] = "user: " + user + " process: " + process + " PID: " + PID + " cpu%: " + cpu + " mem%: " + mem + " cpu time: " + cpuTime
+				userProcess[record] = "\nuser: " + user + "\nprocess: " + process + "\nPID: " + PID + "\ncpu%: " + cpu + "\nmem%: " + mem + "\ncpu time: " + cpuTime
 		
 				log.write(str(now.now()) +": " + record + " (" + PID + " cpu:" + cpu + " mem:" + mem + " cpuTime: " +cpuTime+") = " + str(userRecords[record]) +"\n")
 				log.flush()
@@ -200,21 +193,23 @@ for record in userRecords.keys():
 			if (timediff < hoursBetweenWarnings):
 				okToSendWarning = False
 				if (DEBUG):
-					print "Not okay to send warning: differnce: " + str(timediff) + " from: " + str(userLastWarned[record]) + " < " + str(hoursBetweenWarnings)
+					print "Not okay to send warning: difference: " + str(timediff) + " from: " + str(userLastWarned[record]) + " < " + str(hoursBetweenWarnings)
 				else:
 					log.write(str(now.now()) +": Not sending warning for: " + record +"\n")
 			else:
 				if (DEBUG):
-					print "Okay to send warning: differnce: " + str(timediff) + " from: " + str(userLastWarned[record]) + " > " + str(hoursBetweenWarnings)
+					print "Okay to send warning: difference: " + str(timediff) + " from: " + str(userLastWarned[record]) + " > " + str(hoursBetweenWarnings)
 		
 		if (okToSendWarning):
 			# Record the time of the warning
 			userLastWarned[record] = datetime.datetime.now()
 	
 			# Find the user name and send a polite email.
-			match = re.search("([A-Za-z0-9_]+)-(.*)", record)
+			# match = re.search("([A-Za-z0-9_-]+)-(.*)", record)
+			match = re.search("user: (.*?)\\nprocess: (.*?)\\n", userProcess[record], re.M)
 			userEmail = match.group(1) + "@" + emailServer
 			userCommand = match.group(2)
+
 			# userEmail = "cnrg-warn@igb.illinois.edu"	
 			if (DEBUG):
 				print record + " gets warning for " + userCommand
@@ -227,12 +222,13 @@ for record in userRecords.keys():
 			p = os.popen(sendmailCommand +" -t", "w")
 			p.write("To: " + userEmail + "\n")
 			p.write("CC: "+ alwaysCCOnAlerts + "\n")
-			p.write("Subject: Head Node Usage Reminder (" + record +")\n")
+			p.write("Reply-To: help@igb.illinois.edu\n")
+			p.write("Subject: Biocluster Login Node Usage Reminder (" + record +")\n")
 			p.write("From: " + emailFromAddress + "\n")
 			p.write("\n")
 			p.write(mailMessage + "\n")
 			p.write("\n")
-			p.write("\tIf you have any questions about this please contact us at help@igb.illinois.edu.\n")
+			p.write("If you have any questions about this please contact us at help@igb.illinois.edu.\n")
 			p.write("\n")
 			p.write("Computer and Network Resource Group\n")
 			p.write("\n")
@@ -241,7 +237,7 @@ for record in userRecords.keys():
 			p.write("Warning sent: " +nowStr + "\n")
 			p.write("\n")
 			result = p.close()
-			log.write(str(now.now()) +": sending warning to " + userEmail + " for " + record)
+			log.write(str(now.now()) +": sending warning to " + userEmail + " for " + record+"\n")
 			log.flush()
 
 # Save the state
