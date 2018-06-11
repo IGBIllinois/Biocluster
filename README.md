@@ -1,11 +1,11 @@
 # Biocluster Custom Scripts
-* [http://biocluster.igb.illinois.edu]
+* http://biocluster.igb.illinois.edu
 * Random scripts we use to improve the biocluster usage, experience
 
 
 ## module_to_mediawiki
 
-*Scraps the environmetal modules applications and puts them in a mediawiki page
+* Scraps the environmetal modules applications and puts them in a mediawiki page
 
 ## environmental_modules
 
