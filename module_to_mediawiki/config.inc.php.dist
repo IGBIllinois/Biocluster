@@ -1,0 +1,11 @@
+<?php
+
+define('__WIKI_API__','');
+define('__WIKI_PAGE__','');
+define('__WIKI_USER__','');
+define('__WIKI_PASSWORD__','');
+define('__WIKI_DOMAIN__','');
+define('__IGNORE_APPS__','');
+define('__SHOW_HIDDEN_APPS__',True);
+
+?>
