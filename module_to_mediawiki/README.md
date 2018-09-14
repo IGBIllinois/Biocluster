@@ -14,4 +14,6 @@ cp config.inc.php.dist config.inc.php
 * Edit config.inc.php with the mediawiki page, title, mediawiki user and password
 * Add to cron script to run every night
 
+## Example
 
+* https://help.igb.illinois.edu/Biocluster_Applications
