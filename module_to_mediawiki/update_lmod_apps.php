@@ -24,10 +24,15 @@ foreach ($module_dirs as $dir) {
 	}
 }
 asort($apps);
+
+$ignore_apps = get_ignore_apps();
 //Format output into array
 $formatted_output = array();
 foreach ($apps as $row) {
-
+		if (in_array($row['package'],$ignore_apps)) {
+			log_alert('Ignoring App: ' . $row['package']);
+			continue;
+		}
 		//Crazy php array manipulation to get homepage	
 		$help_array = explode("\n",$row['versions'][0]['help']);
 		$homepage_array = array_values(preg_grep("/Homepage:/",$help_array));

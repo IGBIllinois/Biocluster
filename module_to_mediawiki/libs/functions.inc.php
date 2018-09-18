@@ -103,4 +103,11 @@ function log_alert($message) {
 
 }
 
+function get_ignore_apps() {
+	//$ignore_apps = array();
+	//if (isset(__IGNORE_APPS__) {
+		$ignore_apps = explode(" ",__IGNORE_APPS__);
+	//}
+	return $ignore_apps;
+}
 ?>
