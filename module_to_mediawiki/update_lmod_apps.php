@@ -21,6 +21,7 @@ foreach ($module_dirs as $dir) {
 	}
 	else {
 		log_alert("Error: Unable to parse apps in " . $dir);
+		exit;
 	}
 }
 asort($apps);
