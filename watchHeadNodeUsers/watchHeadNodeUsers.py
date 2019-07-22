@@ -20,7 +20,6 @@
 
 import sys, re, os, time, datetime, pickle
 
-import config.inc.py
 
 DEBUG = False
 
@@ -37,10 +36,18 @@ if (DEBUG):
 # Commands
 topCommand = "/bin/ps -A o pid,user:18,s,%cpu,%mem,time,comm"
 localAccountsCommand = "awk -F':' '{ print $1}' /etc/passwd | grep"
+sendmailCommand = "/usr/sbin/sendmail"
+emailServer = "igb.illinois.edu"
 
+# Someone to always CC on email alerts
+alwaysCCOnAlerts = "cnrg-warn@igb.illinois.edu"
+# The from address for the emails
+emailFromAddress = "Biocluster <do-not-reply@igb.illinois.edu>"
+# Mail message body
+mailMessage = "Hello,\n\tThis is a friendly reminder that you have been running a process on the Biocluster login node. You should not run anything that uses up a lot of CPU or memory on the login node. Instead please use 'srun --pty /bin/bash' to login to a compute node. More information can be found at https://help.igb.illinois.edu/Biocluster\n"
 
 # Processes to ignore
-processesToIgnore = ["smbd", "Xvnc", "sshd", "ssh", "rsync","wget", "mmfsd", "scp", "grep","sftp-server","vim","sftp","cp","md5sum","gftp-gtk","system-specific","find","emacs","globus-gridftp-","sort","cut","du","ftp","lftp","uzip","ascp","aws","gtdownload","sha256sum","less","curl","rclone"]
+processesToIgnore = ["smbd", "Xvnc", "sshd", "ssh", "rsync","wget", "mmfsd", "scp", "grep","sftp-server","vim","sftp","cp","md5sum","gftp-gtk","system-specific","find","emacs","globus-gridftp-","sort","cut","du","ftp","lftp","uzip","ascp","aws","gtdownload","sha256sum","less","curl","rclone","gdc-client","iget"]
 # Users to ignore
 usersToIgnore = ["blastweb","datamover"]
 # Thresholds for CPU and memory usage that lead to an increase in the user's

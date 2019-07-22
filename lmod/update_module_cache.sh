@@ -1,5 +1,3 @@
 #!/bin/bash
 source /etc/profile
-module use /opt/ohpc/admin/lmod/6.0.24/modulefiles/Core
-module load lmod
-update_lmod_system_cache_files $LMOD_DEFAULT_MODULEPATH
+/opt/ohpc/admin/lmod/lmod/libexec/update_lmod_system_cache_files -t /home/apps/cache/system.txt -d /home/apps/cache/spidercache $MODULEPATH
