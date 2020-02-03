@@ -7,5 +7,5 @@ define('__WIKI_PASSWORD__','');
 define('__WIKI_DOMAIN__','');
 define('__IGNORE_APPS__','');
 define('__SHOW_HIDDEN_APPS__',True);
-
+define('__LMOD_SPIDER_PATH__','');
 ?>

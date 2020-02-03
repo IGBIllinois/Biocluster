@@ -77,7 +77,7 @@ function wiki_edit_page($website_api,$title,$text,$cookie_file) {
 function get_lmod_apps($directory) {
 
 	if (file_exists($directory)) {
-		$exec = "source /etc/profile; /opt/ohpc/admin/lmod/6.0.24/libexec/spider -o jsonSoftwarePage " . $directory;
+		$exec = "source /etc/profile; " . __LMOD_SPIDER_PATH__ . " -o jsonSoftwarePage " . $directory;
 		$exit_status = 1;
 		$output_array = array();
 		$output = exec($exec,$output_array,$exit_status);
