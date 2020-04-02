@@ -24,7 +24,8 @@ foreach ($module_dirs as $dir) {
 		exit;
 	}
 }
-asort($apps);
+array_multisort(array_column($apps,"package"),SORT_NATURAL | SORT_FLAG_CASE,$apps);
+
 
 $ignore_apps = get_ignore_apps();
 //Format output into array
