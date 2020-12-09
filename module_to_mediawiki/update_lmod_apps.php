@@ -3,13 +3,42 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
 require_once 'libs/functions.inc.php';
-require_once 'config.inc.php';
 
-$sapi_type = php_sapi_name();
-if ($sapi_type != 'cli') {
-        log_alert("Error: This script can only be run from the command line.");
-	exit;
+$output_command = "Usage: php lmod_to_mediawiki.php -n CONFIG_FILE\n";
+$output_command .= "   -c Config File\n";
+$output_command .= "   -h Show Usage\n";
+
+$shortopts = "";
+$shortopts .= "c:";
+$shortopts .= "h::";
+
+if (php_sapi_name() != 'cli') {
+        exit("Error: This script can only be run from the command line.\n");
 }
+
+$error = false;
+$message = "";
+$options = getopt($shortopts);
+
+if (isset($options['h'])) {
+	echo $output_command;
+	exit(0);
+}
+if ((!isset($options['c'])) || ($options['c'] == "")) {
+	$error = true;
+	$message .= "Error: Please specify a configuration file with the -c parameter\n";
+	exit(1);
+}
+elseif (!file_exists($options['c'])) {
+	$error = true;
+	$message .= "Error: Config file " . $options['c'] . " does not exist\n";
+	exit(1);
+}
+else {
+
+	require_once $options['c'];
+}
+
 
 $module_dirs = explode(" ",__MODULE_DIRS__);
 $apps = array();
