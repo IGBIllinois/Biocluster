@@ -47,7 +47,7 @@ emailFromAddress = "Biocluster <do-not-reply@igb.illinois.edu>"
 mailMessage = "Hello,\n\tThis is a friendly reminder that you have been running a process on the Biocluster login node. You should not run anything that uses up a lot of CPU or memory on the login node. Instead please use 'srun --pty /bin/bash' to login to a compute node. More information can be found at https://help.igb.illinois.edu/Biocluster\n"
 
 # Processes to ignore
-processesToIgnore = ["smbd", "Xvnc", "sshd", "ssh", "rsync","wget", "mmfsd", "scp", "grep","sftp-server","vim","sftp","cp","md5sum","gftp-gtk","system-specific","find","emacs","globus-gridftp-","sort","cut","du","ftp","lftp","uzip","ascp","aws","gtdownload","sha256sum","less","curl","rclone","gdc-client","iget"]
+processesToIgnore = ["smbd", "Xvnc", "sshd", "ssh", "rsync","wget", "mmfsd", "scp", "grep","sftp-server","vim","sftp","cp","gftp-gtk","system-specific","find","emacs","globus-gridftp-","sort","cut","du","ftp","lftp","uzip","ascp","aws","gtdownload","less","curl","rclone","gdc-client","iget","prefetch","conda","fastq-dump"]
 # Users to ignore
 usersToIgnore = ["blastweb","datamover"]
 # Thresholds for CPU and memory usage that lead to an increase in the user's
@@ -257,4 +257,4 @@ except IOError or PickleError:
 
 	
 log.close()
-    
+ 
