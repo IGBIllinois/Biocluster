@@ -34,7 +34,7 @@ if (DEBUG):
 	stateFile = "./watchHeadNodeUsers.state"
 
 # Commands
-topCommand = "/bin/ps -A o pid,user:18,s,%cpu,%mem,time,comm"
+topCommand = "/bin/ps -A o pid,user:25,s,%cpu,%mem,time,comm,args"
 localAccountsCommand = "awk -F':' '{ print $1}' /etc/passwd | grep"
 sendmailCommand = "/usr/sbin/sendmail"
 emailServer = "igb.illinois.edu"
@@ -47,9 +47,41 @@ emailFromAddress = "Biocluster <do-not-reply@igb.illinois.edu>"
 mailMessage = "Hello,\n\tThis is a friendly reminder that you have been running a process on the Biocluster login node. You should not run anything that uses up a lot of CPU or memory on the login node. Instead please use 'srun --pty /bin/bash' to login to a compute node. More information can be found at https://help.igb.illinois.edu/Biocluster\n"
 
 # Processes to ignore
-processesToIgnore = ["smbd", "Xvnc", "sshd", "ssh", "rsync","wget", "mmfsd", "scp", "grep","sftp-server","vim","sftp","cp","gftp-gtk","system-specific","find","emacs","globus-gridftp-","sort","cut","du","ftp","lftp","uzip","ascp","aws","gtdownload","less","curl","rclone","gdc-client","iget","prefetch","conda","fastq-dump"]
+processesToIgnore = ["Xvnc", 
+	"sshd", 
+	"ssh", 
+	"rsync",
+	"wget", 
+	"mmfsd", 
+	"scp", 
+	"sftp-server",
+	"vim",
+	"sftp",
+	"cp",
+	"gftp-gtk",
+	"system-specific",
+	"find",
+	"emacs",
+	"globus-gridftp-",
+	"du",
+	"ftp",
+	"lftp",
+	"ascp",
+	"aws",
+	"gtdownload",
+	"less",
+	"curl",
+	"rclone",
+	"gdc-client",
+	"iget",
+	"prefetch",
+	"conda",
+	"fastq-dump",
+	"/home/apps/software/Java/11.0.5/bin/java -classpath /home/apps/software/ds3_java_cli/5.1.2/lib/ds3_java_cli-5.1.2.jar",
+	"singularity pull"
+]
 # Users to ignore
-usersToIgnore = ["blastweb","datamover"]
+usersToIgnore = []
 # Thresholds for CPU and memory usage that lead to an increase in the user's
 #  record temperature.
 cpuLimit = 15.0
@@ -125,7 +157,7 @@ headers = child.readline()
 
 # Look at each process running
 for line in child.readlines():
-	match = re.search("\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)", line)
+	match = re.search("\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.*)", line)
 	if (match):
 		PID = match.group(1)
 		user = match.group(2)
@@ -133,12 +165,15 @@ for line in child.readlines():
 		mem = match.group(5)
 		cpuTime = match.group(6)
 		process = match.group(7)
-	
+		args = match.group(8)
 		cpuPercent = float(cpu)
 		memPercent = float(mem)
 	
 		# If it is using too much CPU or memory check if it is a real user process.
-		if (((cpuPercent >= cpuLimit) | (memPercent >= memLimit)) & (process not in processesToIgnore)):
+		if ((cpuPercent >= cpuLimit) | (memPercent >= memLimit)):
+			if ((process in processesToIgnore) | (arg in processesToIgnore)):
+				break
+	
 			if (DEBUG):
 				print "\t1. User: " + user + " is over limits: " + str(cpuPercent) + "/" + str(memPercent)
 			# Check if this is a real user by seeing if they are not in
@@ -170,7 +205,7 @@ for line in child.readlines():
 					userRecords[record] = userRecords[record] + recordPenalty
 				else:
 					userRecords[record] = recordPenalty
-				userProcess[record] = "\nuser: " + user + "\nprocess: " + process + "\nPID: " + PID + "\ncpu%: " + cpu + "\nmem%: " + mem + "\ncpu time: " + cpuTime
+				userProcess[record] = "\nUser: " + user + "\nProcess: " + args + "\nPID: " + PID + "\nCPU%: " + cpu + "\nMem%: " + mem + "\nCPU Time: " + cpuTime
 		
 				log.write(str(now.now()) +": " + record + " (" + PID + " cpu:" + cpu + " mem:" + mem + " cpuTime: " +cpuTime+") = " + str(userRecords[record]) +"\n")
 				log.flush()
@@ -224,10 +259,10 @@ for record in userRecords.keys():
 			now = datetime.datetime
 			nowStr = str(now.now())
 			log.write(nowStr + ": warning to " + record +" for " + userProcess[record] + "\n")
-	
+			'''
 			# Build and send the email.
 			p = os.popen(sendmailCommand +" -t", "w")
-			p.write("To: " + userEmail + "\n")
+			#p.write("To: " + userEmail + "\n")
 			p.write("CC: "+ alwaysCCOnAlerts + "\n")
 			p.write("Reply-To: help@igb.illinois.edu\n")
 			p.write("Subject: Biocluster Login Node Usage Reminder (" + record +")\n")
@@ -245,6 +280,7 @@ for record in userRecords.keys():
 			p.write("\n")
 			result = p.close()
 			log.write(str(now.now()) +": sending warning to " + userEmail + " for " + record+"\n")
+			'''
 			log.flush()
 
 # Save the state
