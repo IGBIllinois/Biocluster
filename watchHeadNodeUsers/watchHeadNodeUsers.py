@@ -76,7 +76,10 @@ processesToIgnore = ["Xvnc",
 	"iget",
 	"prefetch",
 	"conda",
-	"fastq-dump",
+	"fastq-dump"
+]
+
+argsToIgnore = [
 	"/home/apps/software/Java/11.0.5/bin/java -classpath /home/apps/software/ds3_java_cli/5.1.2/lib/ds3_java_cli-5.1.2.jar",
 	"singularity pull"
 ]
@@ -171,7 +174,7 @@ for line in child.readlines():
 	
 		# If it is using too much CPU or memory check if it is a real user process.
 		if ((cpuPercent >= cpuLimit) | (memPercent >= memLimit)):
-			if ((process in processesToIgnore) | (arg in processesToIgnore)):
+			if ((process in processesToIgnore) | (args.startswith(tuple(argsToIgnore)))):
 				break
 	
 			if (DEBUG):
@@ -205,7 +208,7 @@ for line in child.readlines():
 					userRecords[record] = userRecords[record] + recordPenalty
 				else:
 					userRecords[record] = recordPenalty
-				userProcess[record] = "\nUser: " + user + "\nProcess: " + args + "\nPID: " + PID + "\nCPU%: " + cpu + "\nMem%: " + mem + "\nCPU Time: " + cpuTime
+				userProcess[record] = "\nUser: " + user + "\nProcess: " + process + "\nArgs: " + args + "\nPID: " + PID + "\nCPU%: " + cpu + "\nMem%: " + mem + "\nCPU Time: " + cpuTime
 		
 				log.write(str(now.now()) +": " + record + " (" + PID + " cpu:" + cpu + " mem:" + mem + " cpuTime: " +cpuTime+") = " + str(userRecords[record]) +"\n")
 				log.flush()
@@ -248,21 +251,19 @@ for record in userRecords.keys():
 	
 			# Find the user name and send a polite email.
 			# match = re.search("([A-Za-z0-9_-]+)-(.*)", record)
-			match = re.search("user: (.*?)\\nprocess: (.*?)\\n", userProcess[record], re.M)
+			match = re.search("User: (.*?)\\nProcess: (.*?)\\n", userProcess[record], re.M)
 			userEmail = match.group(1) + "@" + emailServer
 			userCommand = match.group(2)
 
-			# userEmail = "cnrg-warn@igb.illinois.edu"	
 			if (DEBUG):
 				print record + " gets warning for " + userCommand
 	
 			now = datetime.datetime
 			nowStr = str(now.now())
 			log.write(nowStr + ": warning to " + record +" for " + userProcess[record] + "\n")
-			'''
 			# Build and send the email.
 			p = os.popen(sendmailCommand +" -t", "w")
-			#p.write("To: " + userEmail + "\n")
+			p.write("To: " + userEmail + "\n")
 			p.write("CC: "+ alwaysCCOnAlerts + "\n")
 			p.write("Reply-To: help@igb.illinois.edu\n")
 			p.write("Subject: Biocluster Login Node Usage Reminder (" + record +")\n")
@@ -280,7 +281,6 @@ for record in userRecords.keys():
 			p.write("\n")
 			result = p.close()
 			log.write(str(now.now()) +": sending warning to " + userEmail + " for " + record+"\n")
-			'''
 			log.flush()
 
 # Save the state
