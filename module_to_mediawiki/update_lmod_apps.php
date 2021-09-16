@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
@@ -26,12 +27,12 @@ if (isset($options['h'])) {
 }
 if ((!isset($options['c'])) || ($options['c'] == "")) {
 	$error = true;
-	$message .= "Error: Please specify a configuration file with the -c parameter\n";
+	echo "Error: Please specify a configuration file with the -c parameter\n";
 	exit(1);
 }
 elseif (!file_exists($options['c'])) {
 	$error = true;
-	$message .= "Error: Config file " . $options['c'] . " does not exist\n";
+	echo "Error: Config file " . $options['c'] . " does not exist\n";
 	exit(1);
 }
 else {
@@ -64,7 +65,7 @@ foreach ($apps as $row) {
 			log_alert('Ignoring App: ' . $row['package']);
 			continue;
 		}
-		//Crazy php array manipulation to get homepage	
+		//Crazy php array manipulation to get homepage
 		$help_array = explode("\n",$row['versions'][0]['help']);
 		$homepage_array = array_values(preg_grep("/Homepage:/",$help_array));
 		$homepage = "";
