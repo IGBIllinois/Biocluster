@@ -34,7 +34,7 @@ if (DEBUG):
 	stateFile = "./watchHeadNodeUsers.state"
 
 # Commands
-topCommand = "/bin/ps -A o pid,user:25,s,%cpu,%mem,time,comm,args"
+topCommand = "/bin/ps -A o pid,user:25,s,%cpu,%mem,time,comm:25,args"
 localAccountsCommand = "awk -F':' '{ print $1}' /etc/passwd | grep"
 sendmailCommand = "/usr/sbin/sendmail"
 emailServer = "igb.illinois.edu"
@@ -76,7 +76,8 @@ processesToIgnore = ["Xvnc",
 	"iget",
 	"prefetch",
 	"conda",
-	"fastq-dump"
+	"fastq-dump",
+	"prefetch-orig.2.10.9",
 ]
 
 argsToIgnore = [
