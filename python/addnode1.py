@@ -120,7 +120,7 @@ for line in hostlines:
         print(args.dataip+"\t"+args.nodename+" "+args.nodename+".data.igb.illinois.edu")
         #writehost.writelines(args.dataip+"\t"+args.nodename+" "+args.nodename+".data.igb.illinois.edu")
     print(line)
-    writehost.writelines(line)
+    #writehost.writelines(line)
 close(writehost)
 #add the node
 print("wwsh node new "+args.nodename+" --netdev="+args.interface+" --ipaddr="+args.ip+" --hwaddr="+args.hwaddr)
