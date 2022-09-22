@@ -125,7 +125,7 @@ except IOError:
 
 # Open the previous data
 try:
-	pickleFile = open(stateFile, "r")
+	pickleFile = open(stateFile, "rb")
 	[userRecords, userProcess, userLastWarned] = pickle.load(pickleFile)
 	pickleFile.close()
 except IOError or PickleError:
@@ -287,7 +287,7 @@ for record in userRecords.keys():
 
 # Save the state
 try:
-	pickleFile = open(stateFile, "w")
+	pickleFile = open(stateFile, "wb")
 	pickle.dump([userRecords, userProcess, userLastWarned], pickleFile)
 	pickleFile.close()
 except IOError or PickleError:
