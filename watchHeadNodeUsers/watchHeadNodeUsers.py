@@ -119,7 +119,7 @@ recordWarningThreshold = 20
 try:
     log = open(logFile, "a")
 except IOError:
-    print "Could not open log file for writing. Using 'temp.log' instead. " + logFile
+    print("Could not open log file for writing. Using 'temp.log' instead. " + logFile)
     log = open("temp.log", "a")
 
 
@@ -129,7 +129,7 @@ try:
 	[userRecords, userProcess, userLastWarned] = pickle.load(pickleFile)
 	pickleFile.close()
 except IOError or PickleError:
-	print "Could not open previous state. Creating a new one..."
+	print("Could not open previous state. Creating a new one...")
 
 
         
@@ -140,7 +140,7 @@ for record in userRecords.keys():
 	# If it's too cold remove the record.
 	if (userRecords[record] <= 0):
 		if (DEBUG):
-			print "Removing record for user " + record
+			print("Removing record for user " + record)
 		del userRecords[record]
 		del userProcess[record]
 
@@ -151,7 +151,7 @@ for record in userLastWarned.keys():
 		timediff = difference.seconds/3600.0 + difference.days*24.0
 		if (timediff > (hoursBetweenWarnings+1)):
 			if (DEBUG):
-				print "Removing last warned date: "+ str(userLastWarned[record]) +" for user " + record
+				print("Removing last warned date: "+ str(userLastWarned[record]) +" for user " + record)
 			del userLastWarned[record]
 
 # Get the top output
@@ -180,23 +180,23 @@ for line in child.readlines():
 				break
 	
 			if (DEBUG):
-				print "\t1. User: " + user + " is over limits: " + str(cpuPercent) + "/" + str(memPercent)
+				print("\t1. User: " + user + " is over limits: " + str(cpuPercent) + "/" + str(memPercent))
 			# Check if this is a real user by seeing if they are not in
 			# the passwd file which should include only local users
 			child2 = os.popen(localAccountsCommand + " " + user, "r")
 			result = child2.readline()
 			child2.close()
 			if(DEBUG):
-				print "\t1. user found in passwd " + result
+				print("\t1. user found in passwd " + result)
 			realUser = True
 			if (result):
 				realUser = False
 				if (DEBUG):
-					print "\t2. User local match: " + user
+					print("\t2. User local match: " + user)
 			if(user in usersToIgnore):
 				realUser = False
-                              	if (DEBUG):
-                                      	print "\t2. User to ignore: " + user
+				if (DEBUG):
+                                      	print("\t2. User to ignore: " + user)
 			# If it is a real user processes, then increase the temperature for
 			#  this processes by indexing it in the dictionary by username-process.
 			#  This insures that even if the PID changes we'll still find them.
@@ -204,7 +204,7 @@ for line in child.readlines():
 				now = datetime.datetime
 				record = user+"-"+process
 				if (DEBUG):
-					print "\t3. Increasing: " + str(now.now()) + PID + " " + user + " " + cpu + " " + mem + " " + cpuTime + " " +process
+					print("\t3. Increasing: " + str(now.now()) + PID + " " + user + " " + cpu + " " + mem + " " + cpuTime + " " +process)
 				# Increment the userRecord
 				if (userRecords.has_key(record)):
 					userRecords[record] = userRecords[record] + recordPenalty
@@ -226,7 +226,7 @@ child.close()
 # Look for any records that need to get warnings
 for record in userRecords.keys():
 	if (DEBUG):
-		print record + " = " + str(userRecords[record])
+		print(record + " = " + str(userRecords[record]))
 
 	if (userRecords[record] >= recordWarningThreshold):
 	# Reset the record temp. It will be removed next time.
@@ -240,12 +240,12 @@ for record in userRecords.keys():
 			if (timediff < hoursBetweenWarnings):
 				okToSendWarning = False
 				if (DEBUG):
-					print "Not okay to send warning: difference: " + str(timediff) + " from: " + str(userLastWarned[record]) + " < " + str(hoursBetweenWarnings)
+					print("Not okay to send warning: difference: " + str(timediff) + " from: " + str(userLastWarned[record]) + " < " + str(hoursBetweenWarnings))
 				else:
 					log.write(str(now.now()) +": Not sending warning for: " + record +"\n")
 			else:
 				if (DEBUG):
-					print "Okay to send warning: difference: " + str(timediff) + " from: " + str(userLastWarned[record]) + " > " + str(hoursBetweenWarnings)
+					print("Okay to send warning: difference: " + str(timediff) + " from: " + str(userLastWarned[record]) + " > " + str(hoursBetweenWarnings))
 		
 		if (okToSendWarning):
 			# Record the time of the warning
@@ -258,7 +258,7 @@ for record in userRecords.keys():
 			userCommand = match.group(2)
 
 			if (DEBUG):
-				print record + " gets warning for " + userCommand
+				print(record + " gets warning for " + userCommand)
 	
 			now = datetime.datetime
 			nowStr = str(now.now())
@@ -291,7 +291,7 @@ try:
 	pickle.dump([userRecords, userProcess, userLastWarned], pickleFile)
 	pickleFile.close()
 except IOError or PickleError:
-	print "ERROR: could not write data to state file " + stateFile
+	print("ERROR: could not write data to state file " + stateFile)
 
 	
 log.close()
