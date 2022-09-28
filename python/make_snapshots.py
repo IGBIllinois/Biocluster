@@ -29,8 +29,8 @@ if args.max >0:
         while len(subfolders)>=args.max:
             subfolders.sort()
             print(subfolders[0])
-            print("mmdelsnapshot "+filesystem+" "+args.fileset+":"+subfolders[0])
-            response=os.system("mmdelsnapshot "+filesystem+" "+args.fileset+":"+subfolders[0])
+            print("/usr/lpp/mmfs/bin/mmdelsnapshot "+filesystem+" "+args.fileset+":"+subfolders[0])
+            response=os.system("/usr/lpp/mmfs/bin/mmdelsnapshot "+filesystem+" "+args.fileset+":"+subfolders[0])
             print(response)
             subfolders = [ f.path for f in os.scandir(fsroot+'/'+args.fileset+'/.snapshots/') if f.is_dir() ]
             subfolders = [os.path.basename(subfolder) for subfolder in subfolders]
@@ -39,8 +39,8 @@ else:
     print("Not removing any old snapshots")
 
 if not os.path.exists(fsroot+'/'+args.fileset+'/.snapshots/'+date):
-    print("mmcrsnapshot "+filesystem+" "+args.fileset+":"+date)
-    response=os.system("mmcrsnapshot "+filesystem+" "+args.fileset+":"+date)
+    print("/usr/lpp/mmfs/bin/mmcrsnapshot "+filesystem+" "+args.fileset+":"+date)
+    response=os.system("/usr/lpp/mmfs/bin/mmcrsnapshot "+filesystem+" "+args.fileset+":"+date)
     print(response)
 else:
     print("Error: snapshot "+date+" appears to already exist in "+fsroot+'/'+args.fileset+'/.snapshots/')
