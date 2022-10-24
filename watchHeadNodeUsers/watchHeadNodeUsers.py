@@ -21,7 +21,7 @@
 import sys, re, os, time, datetime, pickle
 import socket
 
-DEBUG = False
+DEBUG = True
 
 # File to log to
 logFile = "/var/log/watchHeadNodeUsers.log"
@@ -147,7 +147,7 @@ for record in userRecords.keys():
 
 # Remove all the last warned times that are out of date.
 for record in userLastWarned.keys():
-	if (userLastWarned.has_key(record)):
+	if (record in userLastWarned):
 		difference = datetime.datetime.now() - userLastWarned[record]
 		timediff = difference.seconds/3600.0 + difference.days*24.0
 		if (timediff > (hoursBetweenWarnings+1)):
@@ -207,11 +207,11 @@ for line in child.readlines():
 				if (DEBUG):
 					print("\t3. Increasing: " + str(now.now()) + PID + " " + user + " " + cpu + " " + mem + " " + cpuTime + " " +process)
 				# Increment the userRecord
-				if (userRecords.has_key(record)):
+				if (record in userRecords):
 					userRecords[record] = userRecords[record] + recordPenalty
 				else:
 					userRecords[record] = recordPenalty
-				userProcess[record] = "\nUser: " + user + "\nHostname: " + hostname + "\nProcess: " + process + "\nArgs: " + args + "\nPID: " + PID + "\nCPU%: " + cpu + "\nMem%: " + mem + "\nCPU Time: " + cpuTime
+				userProcess[record] = "\nUser: " + user + "\nProcess: " + process + "\nHostname: " + hostname + "\nArgs: " + args + "\nPID: " + PID + "\nCPU%: " + cpu + "\nMem%: " + mem + "\nCPU Time: " + cpuTime
 		
 				log.write(str(now.now()) +": " + record + " (" + PID + " cpu:" + cpu + " mem:" + mem + " cpuTime: " +cpuTime+") = " + str(userRecords[record]) +"\n")
 				log.flush()
@@ -235,7 +235,7 @@ for record in userRecords.keys():
 	
 		# Check that we haven't sent a warning in the last day
 		okToSendWarning = True
-		if (userLastWarned.has_key(record)):
+		if (record in userLastWarned):
 			difference = datetime.datetime.now() - userLastWarned[record]
 			timediff = difference.days*24.0 + difference.seconds/3600.00
 			if (timediff < hoursBetweenWarnings):
@@ -254,6 +254,7 @@ for record in userRecords.keys():
 	
 			# Find the user name and send a polite email.
 			# match = re.search("([A-Za-z0-9_-]+)-(.*)", record)
+			print(userProcess[record])
 			match = re.search("User: (.*?)\\nProcess: (.*?)\\n", userProcess[record], re.M)
 			userEmail = match.group(1) + "@" + emailServer
 			userCommand = match.group(2)
