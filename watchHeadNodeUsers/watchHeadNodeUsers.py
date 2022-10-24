@@ -28,11 +28,6 @@ logFile = "/var/log/watchHeadNodeUsers.log"
 # File to store our state from run to run
 stateFile = "/var/cache/watchHeadNodeUsers/watchHeadNodeUsers.state"
 
-# If we're debugging use local files
-if (DEBUG):
-	logFile = "./watchHeadNodeUsers.log"
-	stateFile = "./watchHeadNodeUsers.state"
-
 # Commands
 topCommand = "/bin/ps -A o pid,user:25,s,%cpu,%mem,time,comm:25,args"
 localAccountsCommand = "awk -F':' '{ print $1}' /etc/passwd | grep"
@@ -111,7 +106,7 @@ recordPenalty = recordCoolDown + 10
 # If this is run every 5 minutes, then with recordPenalty = 11 and recordCoolDown = 1,
 #  a user will get a warning after 2 runs (10 minutes) with a warning threshold
 # of 20.
-recordWarningThreshold = 20 
+recordWarningThreshold = 20
 
 
 
@@ -132,8 +127,6 @@ try:
 except IOError or PickleError:
 	print("Could not open previous state. Creating a new one...")
 
-
-        
 # Slowly cool down the userRecords' temperatures so they will be removed
 #  once they are not active.
 for record in userRecords.copy().keys():
