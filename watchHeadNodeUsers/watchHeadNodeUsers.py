@@ -21,7 +21,7 @@
 import sys, re, os, time, datetime, pickle
 import socket
 
-DEBUG = True
+DEBUG = False
 
 # File to log to
 logFile = "/var/log/watchHeadNodeUsers.log"
@@ -136,7 +136,7 @@ except IOError or PickleError:
         
 # Slowly cool down the userRecords' temperatures so they will be removed
 #  once they are not active.
-for record in userRecords.keys():
+for record in userRecords.copy().keys():
 	userRecords[record] = userRecords[record] - recordCoolDown;
 	# If it's too cold remove the record.
 	if (userRecords[record] <= 0):
@@ -146,7 +146,7 @@ for record in userRecords.keys():
 		del userProcess[record]
 
 # Remove all the last warned times that are out of date.
-for record in userLastWarned.keys():
+for record in userLastWarned.copy().keys():
 	if (record in userLastWarned):
 		difference = datetime.datetime.now() - userLastWarned[record]
 		timediff = difference.seconds/3600.0 + difference.days*24.0
