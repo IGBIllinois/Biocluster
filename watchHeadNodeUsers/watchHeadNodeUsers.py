@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #
 # A script to watch for excesive CPU usage by users on the head node.
@@ -19,7 +19,7 @@
 #
 
 import sys, re, os, time, datetime, pickle
-
+import socket
 
 DEBUG = False
 
@@ -38,6 +38,7 @@ topCommand = "/bin/ps -A o pid,user:25,s,%cpu,%mem,time,comm:25,args"
 localAccountsCommand = "awk -F':' '{ print $1}' /etc/passwd | grep"
 sendmailCommand = "/usr/sbin/sendmail"
 emailServer = "igb.illinois.edu"
+hostname = socket.gethostname()
 
 # Someone to always CC on email alerts
 alwaysCCOnAlerts = "cnrg-warn@igb.illinois.edu"
@@ -210,7 +211,7 @@ for line in child.readlines():
 					userRecords[record] = userRecords[record] + recordPenalty
 				else:
 					userRecords[record] = recordPenalty
-				userProcess[record] = "\nUser: " + user + "\nProcess: " + process + "\nArgs: " + args + "\nPID: " + PID + "\nCPU%: " + cpu + "\nMem%: " + mem + "\nCPU Time: " + cpuTime
+				userProcess[record] = "\nUser: " + user + "\nHostname: " + hostname + "\nProcess: " + process + "\nArgs: " + args + "\nPID: " + PID + "\nCPU%: " + cpu + "\nMem%: " + mem + "\nCPU Time: " + cpuTime
 		
 				log.write(str(now.now()) +": " + record + " (" + PID + " cpu:" + cpu + " mem:" + mem + " cpuTime: " +cpuTime+") = " + str(userRecords[record]) +"\n")
 				log.flush()
