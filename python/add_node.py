@@ -11,13 +11,12 @@ import subprocess
 import time
 
 #network definitions
-clusternet='10.1.2.0/24'
-datanet='172.16.28.0/24'
-gateway='10.1.1.1'
+clusternet='10.1.2.0/24';
+datanet='172.16.28.0/24';
 netconfig='/root/node-network-configs/'
 #netconfig='./'
 hostsfile='/etc/hosts'
-vnfs='standard-20220920'
+vnfs='standard-20221027'
 bootstrap='4.18.0-348.23.1.el8_5.x86_64'
 
 env = {}
@@ -50,8 +49,7 @@ def check_ip_usage(address):
         quit()
 
 def format_hw_address(address):
-    if not re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", address.lower()) and not re.match("[0-9a-f]{4}.[0-9a-f]{4}.[0-9a-f]{4}$", address.lower()) and not re.match("[0-9a-f]{12}$",address.lower(
-)):
+    if not re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", address.lower()) and not re.match("[0-9a-f]{4}.[0-9a-f]{4}.[0-9a-f]{4}$", address.lower()) and not re.match("[0-9a-f]{12}$",address.lower()):
         print("Hardware address "+address+" is not a valid hw address")
         quit()
     else:
@@ -80,12 +78,24 @@ parser.add_argument('--hwaddr',type=str,required=True,help="Hardware address of 
 parser.add_argument('--datahwaddr',type=str,help="Hardware address of data network inteface, defaults to hwaddr")
 parser.add_argument('--interface',type=str,default='eth0',help="Name of the network interface on the node (default eth0)")
 parser.add_argument('--dataint',type=str,default='eth0.150',help="Name of the data network interace on node (default eth0.150)")
+parser.add_argument('--scratch',type=str,default='sata',help="Type of scratch disk to create on node (default sata, options nvme,none)")
 args=parser.parse_args()
 
 #set data hw address to cluster hw address if data hw address does not exist
 if args.datahwaddr == None:
   args.datahwaddr=args.hwaddr
-
+  
+#check to see if scratch is specified
+if args.scratch == 'sata':
+    scratchcmd = "wwsh provision set -f gpt.cmds "
+elif args.scratch == 'nvme':
+    scratchcmd = "wwsh provision set -f nvme.cmds "
+elif args.scratch == 'none':
+    scratchcmd="False"
+else:
+  print("Error, options for scratch can only be sata, nvme, or none")
+  quit()
+  
 #Check if ip addresses are valid
 validate_ip_address(args.ip)
 validate_ip_address(args.dataip)
@@ -116,7 +126,11 @@ except OSError as e:
         quit()
     else:
         raise
-dataipfile.write("DEVICE="+args.dataint+"\nBOOTPROTO=static\nONBOOT=yes\nIPADDR="+args.dataip+"\nNETMASK=255.255.252.0\nHWADDR="+args.datahwaddr+"\nVLAN=yes")
+    
+if args.dataint != None and '\\.' in args.dataint:
+    dataipfile.write("DEVICE="+args.dataint+"\nBOOTPROTO=static\nONBOOT=yes\nIPADDR="+args.dataip+"\nNETMASK=255.255.252.0\nHWADDR="+args.datahwaddr+"\nVLAN=yes")
+else:
+    dataipfile.write("DEVICE="+args.dataint+"\nBOOTPROTO=static\nONBOOT=yes\nIPADDR="+args.dataip+"\nNETMASK=255.255.252.0\nHWADDR="+args.datahwaddr)
 dataipfile.close()
 #update hosts to include data ip information
 readhost=open(hostsfile,'r')
@@ -136,10 +150,8 @@ writehost.close()
 time.sleep(1)
 
 #add the node
-print("/usr/bin/wwsh -y -v node new "+args.nodename+" --netdev="+args.interface+" --ipaddr="+args.ip+" --gateway="+gateway+" --hwaddr="+args.hwaddr)
-process = subprocess.run("/usr/bin/wwsh -y node new "+args.nodename+" --netdev="+args.interface+" --ipaddr="+args.ip+" --gateway="+gateway+" --hwaddr="+args.hwaddr, shell=True, stdout=subprocess.PIPE, stderr=sub
-process.PIPE)
-print(process)
+print("/usr/bin/wwsh -y -v node new "+args.nodename+" --netdev="+args.interface+" --ipaddr="+args.ip+" --hwaddr="+args.hwaddr)
+process = subprocess.run("/usr/bin/wwsh -y node new "+args.nodename+" --netdev="+args.interface+" --ipaddr="+args.ip+" --hwaddr="+args.hwaddr, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 error=process.stderr.decode('ascii')
 if error != "":
     print(process.stderr)
@@ -154,12 +166,20 @@ if error != "":
     quit()
     
 #provision the node
-print("wwsh provision set "+args.nodename+"  --vnfs="+vnfs+" --bootstrap="+bootstrap+" --files=dynamic_hosts,passwd,group,shadow,munge.key,network,"+args.nodename+'-'+args.dataint)
-process = subprocess.run("wwsh provision set "+args.nodename+"  --vnfs="+vnfs+" --bootstrap="+bootstrap+" --files=dynamic_hosts,passwd,group,shadow,munge.key,"+args.nodename+'-'+args.dataint, shell=True, stderr=
-subprocess.PIPE, stdout=subprocess.PIPE)
+print("wwsh provision set "+args.nodename+"  --vnfs="+vnfs+" --bootstrap="+bootstrap+" --files=dynamic_hosts,passwd,group,shadow,munge.key,mmsdrfs"+args.nodename+'-'+args.dataint)
+process = subprocess.run("wwsh provision set "+args.nodename+"  --vnfs="+vnfs+" --bootstrap="+bootstrap+" --files=dynamic_hosts,passwd,group,shadow,munge.key,mmsdrfs,"+args.nodename+'-'+args.dataint, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 error=process.stderr.decode('ascii')
 if error != "":
     print(error)
     quit()
+    
+#set up scratch
+if scratchcmd != 'False':
+    print(scratchcmd + args.nodename)
+    process = subprocess.run(scratchcmd + args.nodename, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    error=process.stderr.decode('ascii')
+    if error != "":
+        print(error)
+        quit()
     
 print("Now you need to reboot the node")
