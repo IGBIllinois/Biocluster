@@ -20,8 +20,9 @@
 
 import sys, re, os, time, datetime, pickle
 import socket
+import subprocess
 
-DEBUG = False
+DEBUG = True
 
 # File to log to
 logFile = "/var/log/watchHeadNodeUsers.log"
@@ -96,7 +97,7 @@ userProcess = {}
 # Last warned dates. 
 userLastWarned = {}
 # Time between warnings in hours
-hoursBetweenWarnings = 2
+hoursBetweenWarnings = 0.1
 
 # How much the record is decreased on each iteration (every sleepTime)
 recordCoolDown = 1
@@ -149,13 +150,19 @@ for record in userLastWarned.copy().keys():
 			del userLastWarned[record]
 
 # Get the top output
-child = os.popen(topCommand, "r")
+#child = os.popen(topCommand, "r")
+process = subprocess.Popen(topCommand, shell=True,stdout=subprocess.PIPE,encoding='utf-8')
+stdout = process.communicate()[0]
+child = stdout.split('\n');
 
-# Read in the headers
-headers = child.readline()
+# Remove headers
+child.pop(0);
 
+for line in child:
+	print(line)
 # Look at each process running
-for line in child.readlines():
+for line in child:
+	#print(line)
 	match = re.search("\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.*)", line)
 	if (match):
 		PID = match.group(1)
@@ -167,9 +174,10 @@ for line in child.readlines():
 		args = match.group(8)
 		cpuPercent = float(cpu)
 		memPercent = float(mem)
-	
 		# If it is using too much CPU or memory check if it is a real user process.
 		if ((cpuPercent >= cpuLimit) | (memPercent >= memLimit)):
+			print("Match: " + user)
+			print("Process: " + process)
 			if ((process in processesToIgnore) | (args.startswith(tuple(argsToIgnore)))):
 				break
 	
@@ -177,9 +185,10 @@ for line in child.readlines():
 				print("\t1. User: " + user + " is over limits: " + str(cpuPercent) + "/" + str(memPercent))
 			# Check if this is a real user by seeing if they are not in
 			# the passwd file which should include only local users
-			child2 = os.popen(localAccountsCommand + " " + user, "r")
-			result = child2.readline()
-			child2.close()
+			user_list = os.popen(localAccountsCommand + " " + user, "r")
+			result = user_list.readline()
+			user_list.close()
+
 			if(DEBUG):
 				print("\t1. user found in passwd " + result)
 			realUser = True
@@ -208,10 +217,6 @@ for line in child.readlines():
 		
 				log.write(str(now.now()) +": " + record + " (" + PID + " cpu:" + cpu + " mem:" + mem + " cpuTime: " +cpuTime+") = " + str(userRecords[record]) +"\n")
 				log.flush()
-			
-# We're done with the top output
-child.close()
-
 
 
 
@@ -257,6 +262,7 @@ for record in userRecords.keys():
 	
 			now = datetime.datetime
 			nowStr = str(now.now())
+			'''
 			log.write(nowStr + ": warning to " + record +" for " + userProcess[record] + "\n")
 			# Build and send the email.
 			p = os.popen(sendmailCommand +" -t", "w")
@@ -277,6 +283,7 @@ for record in userRecords.keys():
 			p.write("Warning sent: " +nowStr + "\n")
 			p.write("\n")
 			result = p.close()
+			'''
 			log.write(str(now.now()) +": sending warning to " + userEmail + " for " + record+"\n")
 			log.flush()
 
