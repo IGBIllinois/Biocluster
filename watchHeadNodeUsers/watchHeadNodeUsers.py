@@ -22,7 +22,7 @@ import sys, re, os, time, datetime, pickle
 import socket
 import subprocess
 
-DEBUG = True
+DEBUG = False
 
 # File to log to
 logFile = "/var/log/watchHeadNodeUsers.log"
@@ -30,7 +30,7 @@ logFile = "/var/log/watchHeadNodeUsers.log"
 stateFile = "/var/cache/watchHeadNodeUsers/watchHeadNodeUsers.state"
 
 # Commands
-topCommand = "/bin/ps -A o pid,user:25,s,%cpu,%mem,time,comm:25,args"
+topCommand = "/bin/ps --no-header -A o pid,user:25,%cpu,%mem,time,comm:25,args"
 localAccountsCommand = "awk -F':' '{ print $1}' /etc/passwd | grep"
 sendmailCommand = "/usr/sbin/sendmail"
 emailServer = "igb.illinois.edu"
@@ -116,9 +116,8 @@ recordWarningThreshold = 20
 try:
     log = open(logFile, "a")
 except IOError:
-    print("Could not open log file for writing. Using 'temp.log' instead. " + logFile)
-    log = open("temp.log", "a")
-
+    print("Permission denied opening " + logFile)
+    quit()
 
 # Open the previous data
 try:
@@ -150,34 +149,27 @@ for record in userLastWarned.copy().keys():
 			del userLastWarned[record]
 
 # Get the top output
-#child = os.popen(topCommand, "r")
 process = subprocess.Popen(topCommand, shell=True,stdout=subprocess.PIPE,encoding='utf-8')
 stdout = process.communicate()[0]
-child = stdout.split('\n');
+child = stdout.split('\n')
 
-# Remove headers
-child.pop(0);
-
-for line in child:
-	print(line)
 # Look at each process running
 for line in child:
-	#print(line)
+	if (DEBUG):
+		print(line)
 	match = re.search("\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.*)", line)
 	if (match):
 		PID = match.group(1)
 		user = match.group(2)
-		cpu = match.group(4)
-		mem = match.group(5)
-		cpuTime = match.group(6)
-		process = match.group(7)
-		args = match.group(8)
+		cpu = match.group(3)
+		mem = match.group(4)
+		cpuTime = match.group(5)
+		process = match.group(6)
+		args = match.group(7)
 		cpuPercent = float(cpu)
 		memPercent = float(mem)
 		# If it is using too much CPU or memory check if it is a real user process.
 		if ((cpuPercent >= cpuLimit) | (memPercent >= memLimit)):
-			print("Match: " + user)
-			print("Process: " + process)
 			if ((process in processesToIgnore) | (args.startswith(tuple(argsToIgnore)))):
 				break
 	
@@ -262,12 +254,11 @@ for record in userRecords.keys():
 	
 			now = datetime.datetime
 			nowStr = str(now.now())
-			'''
 			log.write(nowStr + ": warning to " + record +" for " + userProcess[record] + "\n")
 			# Build and send the email.
 			p = os.popen(sendmailCommand +" -t", "w")
 			p.write("To: " + userEmail + "\n")
-			p.write("CC: "+ alwaysCCOnAlerts + "\n")
+			p.write("BCC: "+ alwaysCCOnAlerts + "\n")
 			p.write("Reply-To: help@igb.illinois.edu\n")
 			p.write("Subject: Biocluster Login Node Usage Reminder (" + record +")\n")
 			p.write("From: " + emailFromAddress + "\n")
@@ -283,7 +274,6 @@ for record in userRecords.keys():
 			p.write("Warning sent: " +nowStr + "\n")
 			p.write("\n")
 			result = p.close()
-			'''
 			log.write(str(now.now()) +": sending warning to " + userEmail + " for " + record+"\n")
 			log.flush()
 
