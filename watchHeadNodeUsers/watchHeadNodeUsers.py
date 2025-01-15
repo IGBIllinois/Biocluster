@@ -253,7 +253,7 @@ for record in userRecords.keys():
 				print(record + " gets warning for " + userCommand)
 	
 			now = datetime.datetime
-			nowStr = str(now.now())
+			nowStr = str(now.now().strftime("%Y-%m-%d %H:%M:%S"))
 			log.write(nowStr + ": warning to " + record +" for " + userProcess[record] + "\n")
 			# Build and send the email.
 			p = os.popen(sendmailCommand +" -t", "w")
@@ -274,7 +274,7 @@ for record in userRecords.keys():
 			p.write("Warning sent: " +nowStr + "\n")
 			p.write("\n")
 			result = p.close()
-			log.write(str(now.now()) +": sending warning to " + userEmail + " for " + record+"\n")
+			log.write(nowStr +": sending warning to " + userEmail + " for " + record+"\n")
 			log.flush()
 
 # Save the state
