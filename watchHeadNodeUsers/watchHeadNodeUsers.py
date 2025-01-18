@@ -74,8 +74,9 @@ processesToIgnore = ["Xvnc",
 	"prefetch",
 	"conda",
 	"fastq-dump",
+	"fastq-dump-orig",
 	"prefetch-orig.2.10.9",
-	"fasterq-dump"
+	"node"
 ]
 
 argsToIgnore = [
