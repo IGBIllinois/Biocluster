@@ -245,7 +245,9 @@ for record in userRecords.keys():
 	
 			# Find the user name and send a polite email.
 			# match = re.search("([A-Za-z0-9_-]+)-(.*)", record)
-			print(userProcess[record])
+			if (DEBUG):
+				print(userProcess[record])
+
 			match = re.search("User: (.*?)\\nProcess: (.*?)\\n", userProcess[record], re.M)
 			userEmail = match.group(1) + "@" + emailServer
 			userCommand = match.group(2)
