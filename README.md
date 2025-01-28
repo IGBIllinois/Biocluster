@@ -26,4 +26,5 @@
 ## watchHeadNodeUsers
 
 * Script to alert users if they are running processes on the headnode or login node
+* Fork of the original script from http://cva.stanford.edu/people/davidbbs/cluster/
  
