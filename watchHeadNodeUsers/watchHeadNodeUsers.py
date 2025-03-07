@@ -78,6 +78,8 @@ processesToIgnore = ["Xvnc",
 	"prefetch-orig.2.10.9",
 	"node",
 	"conda-env"
+	"pip"
+	"prefetch-orig.3"
 ]
 
 argsToIgnore = [
