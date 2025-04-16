@@ -77,8 +77,8 @@ processesToIgnore = ["Xvnc",
 	"fastq-dump-orig",
 	"prefetch-orig.2.10.9",
 	"node",
-	"conda-env"
-	"pip"
+	"conda-env",
+	"pip",
 	"prefetch-orig.3"
 ]
 
