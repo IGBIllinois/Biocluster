@@ -66,8 +66,13 @@ foreach ($apps as $row) {
 			continue;
 		}
 		//Crazy php array manipulation to get homepage
-		$help_array = explode("\n",$row['versions'][0]['help']);
-		$homepage_array = array_values(preg_grep("/Homepage:/",$help_array));
+		if (array_key_exists(0,$row['versions'])) {
+			$help_array = explode("\n",$row['versions'][0]['help']);
+			$homepage_array = array_values(preg_grep("/Homepage:/",$help_array));
+		}
+		else {
+			log_alert("Error: Invalid homepage for " . $row['package']);
+		}
 		$homepage = "";
 		if (count($homepage_array)) {
 			$homepage = trim(rtrim(substr($homepage_array[0],strpos($homepage_array[0],":")+2)));
