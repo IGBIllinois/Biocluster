@@ -61,6 +61,7 @@ $ignore_apps = get_ignore_apps();
 //Format output into array
 $formatted_output = array();
 foreach ($apps as $row) {
+		$homepage = "";
 		if (in_array($row['package'],$ignore_apps)) {
 			log_alert('Ignoring App: ' . $row['package']);
 			continue;
@@ -69,18 +70,18 @@ foreach ($apps as $row) {
 		if (array_key_exists(0,$row['versions'])) {
 			$help_array = explode("\n",$row['versions'][0]['help']);
 			$homepage_array = array_values(preg_grep("/Homepage:/",$help_array));
-		}
-		else {
-			log_alert("Error: Invalid homepage for " . $row['package']);
-		}
-		$homepage = "";
-		if (count($homepage_array)) {
-			$homepage = trim(rtrim(substr($homepage_array[0],strpos($homepage_array[0],":")+2)));
-			if (!filter_var($homepage,FILTER_VALIDATE_URL)) {
-				log_alert("Error: Invalid homepage for " . $row['package']);
-				$homeage = "";
+			if (count($homepage_array)) {
+				$homepage = trim(substr($homepage_array[0],strpos($homepage_array[0],":")+2));
+				if (!filter_var($homepage,FILTER_VALIDATE_URL)) {
+					log_alert("Error: Invalid homepage for " . $row['package']);
+					$homepage = "";
+				}
 			}
 		}
+		else {
+                        log_alert("Error: Invalid homepage for " . $row['package']);
+			$homepage = "";
+                }
 
 		//Get Versions
 		$versions_array = array();
@@ -105,6 +106,7 @@ foreach ($apps as $row) {
 					'homepage'=>$homepage
 					);
 		array_push($formatted_output,$formatted_row);
+		unset($homepage);
 }
 
 //Creates table header
