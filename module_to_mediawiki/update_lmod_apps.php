@@ -61,6 +61,8 @@ $ignore_apps = get_ignore_apps();
 //Format output into array
 $formatted_output = array();
 foreach ($apps as $row) {
+		print_r($row);
+		echo "\n";
 		$homepage = "";
 		if (in_array($row['package'],$ignore_apps)) {
 			log_alert('Ignoring App: ' . $row['package']);
@@ -85,13 +87,16 @@ foreach ($apps as $row) {
 
 		//Get Versions
 		$versions_array = array();
-		foreach ($row['versions'] as $version_row) {
-			$format_version = substr($version_row['full'],strpos($version_row['full'],"/")+1);
-			array_push($versions_array,$format_version);
+		if (count($row['versions'])) {
+			foreach ($row['versions'] as $version_row) {
+				$format_version = substr($version_row['full'],strpos($version_row['full'],"/")+1);
+				array_push($versions_array,$format_version);
+			}
+			asort($versions_array);
+			$versions = implode("<br>",$versions_array);
 		}
-		asort($versions_array);
-		$versions = implode("<br>",$versions_array);
 
+		//Get Description
 		$description = "";
 		if (isset($row['description'])) {
 			$description = str_replace("\n","",$row['description']);
@@ -100,13 +105,17 @@ foreach ($apps as $row) {
 			log_alert("Error: No Description set for " . $row['package']);
 		}
 		//formatted array of applications
-		$formatted_row = array('app'=>$row['package'],
+		if (count($versions_array)) {
+			$formatted_row = array('app'=>$row['package'],
 					'version'=>$versions,
 					'whatis'=>$description,
 					'homepage'=>$homepage
 					);
-		array_push($formatted_output,$formatted_row);
+			array_push($formatted_output,$formatted_row);
+		}
 		unset($homepage);
+		unset($description);
+		
 }
 
 //Creates table header
