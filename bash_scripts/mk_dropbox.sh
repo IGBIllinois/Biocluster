@@ -1,12 +1,14 @@
 #!/bin/bash
 
+#UID=$(id -u $PAM_USER)
 if [ -z $PAM_USER ]; then
 	echo "PAM_USER environment variable unset. This script is to be used with pam_exec.so module";
 	exit
 fi
-if [ $UID -lt 1000 ]; then
-	exit
-fi
+#if [ $UID -lt 1000 ]; then
+#	exit
+#fi
+
 if [[ $PAM_USER =~ ^[a-m] ]]; then
         drop_path="/home/a-m/dropboxes/$PAM_USER"
 

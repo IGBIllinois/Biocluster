@@ -12,7 +12,7 @@ if [ $UID -ge 1000 ]; then
 	fi
 
 	if [ ! -d $home_path/dropbox ]; then
-		ln -s $drop_path $home_path/dropbox
+		ln -s $drop_path $home_path/dropbox 2> /dev/null
 		echo "Created dropbox symbolic link"
 	fi
 
