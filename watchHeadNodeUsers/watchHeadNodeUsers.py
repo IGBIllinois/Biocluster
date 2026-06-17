@@ -81,7 +81,8 @@ processesToIgnore = ["Xvnc",
 	"conda-env",
 	"pip",
 	"prefetch-orig.3",
-	"wandb"
+	"wandb",
+	"MainThread"
 ]
 
 argsToIgnore = [
