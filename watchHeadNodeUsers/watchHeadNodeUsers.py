@@ -82,7 +82,8 @@ processesToIgnore = ["Xvnc",
 	"pip",
 	"prefetch-orig.3",
 	"wandb",
-	"MainThread"
+	"MainThread",
+	"rg"
 ]
 
 argsToIgnore = [
