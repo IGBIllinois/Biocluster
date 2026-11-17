@@ -1,0 +1,4 @@
+#update wiki pages
+0 4 * * * root source /etc/profile; php /usr/local/biocluster/module_to_mediawiki/update_lmod_apps.php -c /usr/local/biocluster/module_to_mediawiki/config.inc.php > /dev/null 2>&1
+0 4 * * * root source /etc/profile; php /usr/local/biocluster/module_to_mediawiki/update_lmod_apps.php -c /usr/local/biocluster/module_to_mediawiki/config.databases.inc.php > /dev/null 2>&1
+

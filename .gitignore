@@ -1,2 +1,4 @@
 module_to_mediawiki/config.inc.php
 module_to_mediawiki/config.databases.inc.php
+module_to_mediawiki/config.ai.inc.php
+
